@@ -1,0 +1,67 @@
+use covid_report;
+select * from coviddata ;
+select * from vaccination_data ;
+ 
+ALTER TABLE coviddata RENAME COLUMN ï»¿Date_reported TO Date;
+ALTER TABLE vaccination_data RENAME COLUMN DATE_UPDATED TO Date;
+
+-- Caculating Highest Cases & Deaths ( date not containing 2020-01-03 because the very first case was found after 03rd Jan 2020) 
+select Date, Country, max(Cumulative_cases) as Highest_cases, max(Cumulative_deaths) as Highest_Deaths from coviddata 
+where country != 'Other' and date != '2020-01-03'
+group by Date, Country 
+order by 1,2 ;
+ 
+ 
+-- Creating CTE to caculated percentage of people who are fully vaccinated 
+-- Grouping Location into 3 parts according to the pecentage of people who are fully vcaccinated
+ 
+With vaccination_report (Date, Country, Highest_vaccinations, fully_vaccinated ,percentpeople_fully_vaccinated)
+as
+(
+select Date, Country, max(total_vaccinations) as Highest_vaccinations, max(PERSONS_FULLY_VACCINATED) as fully_vaccinated, 
+max(PERSONS_FULLY_VACCINATED)/max(TOTAL_VACCINATIONS)*100 as percentpeople_fully_vaccinated
+from vaccination_data
+group by Date, Country 
+order by 2 )
+ 
+Select Date , Country, Highest_vaccinations, percentpeople_fully_vaccinated, 
+Case
+when percentpeople_fully_vaccinated <= 30 then 'Countries are less Vaccinated'
+    when percentpeople_fully_vaccinated <= 60 then 'Countries under the porcess of vaccination'
+    Else 'Countries almost vaccinated'
+end as Vaccination_status
+from vaccination_report ;
+ 
+select * from vaccination_report;
+ 
+-- Creating Views to store data for further Viz
+ 
+Create View peoplefullyvaccinated as 
+With vaccination_report (Date, Country, Highest_vaccinations, fully_vaccinated ,percentpeople_fully_vaccinated)
+as
+(
+select Date, Country, max(total_vaccinations) as Highest_vaccinations, max(PERSONS_FULLY_VACCINATED) as fully_vaccinated, 
+max(PERSONS_FULLY_VACCINATED)/max(TOTAL_VACCINATIONS)*100 as percentpeople_fully_vaccinated
+from vaccination_data
+group by Date, Country 
+order by 2 )
+ 
+Select Date , Country, Highest_vaccinations, percentpeople_fully_vaccinated, 
+Case
+when percentpeople_fully_vaccinated <= 30 then 'Countries are less Vaccinated'
+    when percentpeople_fully_vaccinated <= 60 then 'Countries under the porcess of vaccination'
+    Else 'Countries almost vaccinated'
+end as Vaccination_status
+from vaccination_report ;
+ 
+select VACCINES_USED from vaccination_data order by 1 ;
+ 
+-- Showing Countries with Highest cases, highest vaccination compared with Fully vaccinated people 
+ 
+select covid.Country, max(covid.Cumulative_cases) as Highest_cases, max(vaccine.total_vaccinations) as Highest_vaccination , max(vaccine.PERSONS_VACCINATED_1PLUS_DOSE)/max(vaccine.total_vaccinations)*100 as people_completed_1st_dose , 
+max(vaccine.PERSONS_FULLY_VACCINATED)/max(vaccine.TOTAL_VACCINATIONS)*100 as peoplefullyvaccinated
+from coviddata as covid 
+join vaccination_data as vaccine on covid.country = vaccine.country
+-- where country != 'Other' 
+group by Country 
+order by 2 desc ;
