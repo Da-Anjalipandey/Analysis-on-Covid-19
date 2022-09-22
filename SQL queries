@@ -27,7 +27,7 @@ order by 2 )
 Select Date , Country, Highest_vaccinations, percentpeople_fully_vaccinated, 
 Case
 when percentpeople_fully_vaccinated <= 30 then 'Countries are less Vaccinated'
-    when percentpeople_fully_vaccinated <= 60 then 'Countries under the porcess of vaccination'
+    when percentpeople_fully_vaccinated <= 60 then 'Countries under the process of vaccination'
     Else 'Countries almost vaccinated'
 end as Vaccination_status
 from vaccination_report ;
@@ -49,7 +49,7 @@ order by 2 )
 Select Date , Country, Highest_vaccinations, percentpeople_fully_vaccinated, 
 Case
 when percentpeople_fully_vaccinated <= 30 then 'Countries are less Vaccinated'
-    when percentpeople_fully_vaccinated <= 60 then 'Countries under the porcess of vaccination'
+    when percentpeople_fully_vaccinated <= 60 then 'Countries under the process of vaccination'
     Else 'Countries almost vaccinated'
 end as Vaccination_status
 from vaccination_report ;
